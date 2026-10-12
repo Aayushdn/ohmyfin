@@ -1,18 +1,39 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useColorScheme } from "react-native";
+import { Pressable } from "react-native";
+import { Stack } from "expo-router";
+import { useCSSVariable } from "uniwind";
+import { useRouter } from "expo-router";
+import { X } from "lucide-react-native";
 
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
-import AppTabs from "@/components/app-tabs";
+export default function appLayout() {
+  const [foreground, surface, line] = useCSSVariable([
+    "--color-foreground",
+    "--color-surface",
+    "--color-line",
+  ]) as string[];
+  const router = useRouter();
 
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="add-transaction"
+        options={{
+          title: "New Entry",
+          headerTitleAlign: "center",
+          headerShadowVisible: true,
+          headerStyle: { backgroundColor: surface },
+          headerTitleStyle: {
+            color: foreground,
+            fontFamily: "NotoSerif-Bold",
+            fontSize: 18,
+          },
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} hitSlop={12}>
+              <X size={24} color={foreground} />
+            </Pressable>
+          ),
+        }}
+      ></Stack.Screen>
+    </Stack>
   );
 }

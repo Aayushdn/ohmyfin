@@ -29,22 +29,70 @@ theme {
   --font-mono: ui-monospace;
 }
 
+@theme {
+}
+
 @layer theme {
   :root {
     @variant light {
       --color-text: #000000;
       --color-background: #ffffff;
-      --color-background-element: #f0f0f3;
+      --color-background-element: #094cb2;
       --color-background-selected: #e0e1e6;
       --color-text-secondary: #60646c;
+      /* --color-primary: #094cb2; */
+
+      --color-background: #faf9f9; /* screen background */
+      --color-surface: #ffffff; /* header, inputs, selected account card */
+      --color-surface-dim: #eeeeee; /* unselected account cards */
+      --color-track: #f3eff0; /* expense/income toggle track */
+      --color-tile: #f3f1f1; /* unselected category tiles */
+      --color-chip: #ebebeb; /* USD chip */
+      --color-line: #ececec; /* header bottom border */
+
+      --color-foreground: #1a1a1a; /* main text and icons */
+      --color-muted: #77737a; /* labels, inactive text, meta */
+      --color-placeholder: #8c8a8f; /* input placeholders */
+
+      --color-primary: #bd6560; /* expense: amount, button, toggle */
+      --color-primary-dark: #9c4f48; /* gradient start for the toggle */
+      --color-income: #3f7d5c; /* income variant (not in screenshot) */
+      --color-on-primary: #ffffff; /* text/icons on colored fills */
+
+      --color-secondary: #5b5fc7; /* indigo: icons, "Manage all", selected category */
+      --color-selection: #2a4fb0; /* blue outline on selected account/category */
     }
 
     @variant dark {
-      --color-text: #ffffff;
-      --color-background: #000000;
-      --color-background-element: #212225;
+      /* existing tokens */
+      --color-text: #f3f0f1;
+      --color-background-element: #094cb2;
       --color-background-selected: #2e3135;
       --color-text-secondary: #b0b4ba;
+
+      /* surfaces */
+      --color-background: #141213; /* screen background */
+      /* --color-surface: #1e1b1d; header, inputs, selected account card */
+      --color-surface: #1e1b1d; /* header, inputs, selected account card */
+      --color-surface-dim: #2a2628; /* unselected account cards */
+      --color-track: #231f21; /* expense/income toggle track */
+      --color-tile: #2d292b; /* unselected category tiles */
+      --color-chip: #353133; /* USD chip */
+      --color-line: #2e2a2c; /* header bottom border */
+
+      /* text */
+      --color-foreground: #f3f0f1; /* main text and icons */
+      --color-muted: #a19ca3; /* labels, inactive text, meta */
+      --color-placeholder: #7c777e; /* input placeholders */
+
+      /* brand */
+      --color-primary: #cf7069; /* expense: amount, button, toggle */
+      --color-primary-dark: #a85650; /* gradient start for the toggle */
+      --color-income: #45986c; /* income variant */
+      --color-on-primary: #ffffff; /* text/icons on colored fills */
+
+      --color-secondary: #7378e6; /* indigo: icons, "Manage all", selected category */
+      --color-selection: #6c8cf0; /* outline on selected account/category */
     }
   }
 }

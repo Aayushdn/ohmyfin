@@ -6,3 +6,4 @@ minimumReleaseAgeExclude:
   - expo-constants@57.0.19
   - expo-router@57.0.22
   - expo@57.0.24
+  - expo-sqlite@57.0.4

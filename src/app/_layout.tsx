@@ -3,41 +3,63 @@ import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { DevPathNavigator } from "@/components/dev-path-navigator";
 
 import { Stack } from "expo-router";
+import AuthProvider from "@/context/AuthProvider";
+import useAuth from "@/context/useAuth";
+import ProfileProvider from "@/context/ProfileProvider";
+import useProfile from "@/context/useProfile";
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  return (
-    <>
-      <AnimatedSplashOverlay />
-      <Stack>
-        <Stack.Screen
-          name="onboarding"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="index"
-          options={{
-            headerStyle: {
-              backgroundColor: "#f4511e",
-            },
-            headerTintColor: "#fff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-          }}
-        />
+function RootNavigator() {
+  const { session, isLoading } = useAuth();
+  const { isOnboarded } = useProfile();
 
+  return (
+    <Stack>
+      <Stack.Protected guard={!!session}>
         <Stack.Screen
           name="(app)"
           options={{
             headerShown: false,
           }}
         />
-      </Stack>
+      </Stack.Protected>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
+      </Stack.Protected>
 
+      {/* <Stack.Screen
+        name="index"
+        options={{
+          headerStyle: {
+            backgroundColor: "#f4511e",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      /> */}
+      <Stack.Protected guard={!!isOnboarded}>
+        <Stack.Screen
+          name="onboarding"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+export default function RootLayout() {
+  return (
+    <>
+      <AuthProvider>
+        <AnimatedSplashOverlay />
+        <ProfileProvider>
+          <RootNavigator />
+        </ProfileProvider>
+      </AuthProvider>
       {/* dev-only, renders nothing in production */}
       <DevPathNavigator />
     </>

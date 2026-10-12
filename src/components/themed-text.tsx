@@ -11,14 +11,16 @@ export type ThemedTextProps = TextProps & {
     | "subtitle"
     | "link"
     | "linkPrimary"
-    | "code";
+    | "code"
+    | "error";
 
   themeColor?:
     | "text"
     | "background"
     | "backgroundElement"
     | "backgroundSelected"
-    | "textSecondary";
+    | "textSecondary"
+    | "error";
 };
 
 const typeStyles = {
@@ -30,6 +32,7 @@ const typeStyles = {
   link: "text-sm leading-[30px]",
   linkPrimary: "text-sm leading-[30px] text-primary",
   code: "text-xs",
+  error: "text-base text-red",
 } as const;
 
 const themeColorStyles = {
@@ -38,6 +41,7 @@ const themeColorStyles = {
   backgroundElement: "text-background-element",
   backgroundSelected: "text-background-selected",
   textSecondary: "text-text-secondary",
+  error: "bg-red",
 } as const;
 
 export function ThemedText({
