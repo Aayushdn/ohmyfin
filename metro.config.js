@@ -14,3 +14,7 @@ module.exports = withUniwindConfig(config, {
   // defaults to project's root
   dtsFile: "./src/uniwind-types.d.ts",
 });
+
+config.resolver.sourceExts.push("sql"); // <--- add this
+
+module.exports = config;

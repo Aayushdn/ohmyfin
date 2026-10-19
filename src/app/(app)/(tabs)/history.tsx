@@ -1,199 +1,202 @@
-import { Image } from "expo-image";
-import { SymbolView } from "expo-symbols";
-import { Platform, Pressable, ScrollView, StyleSheet } from "react-native";
+import { useMemo, useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { CircleX, Funnel, Receipt, Search, X } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Icon } from "@/components/ui/icon";
+import { FilterSheet } from "@/components/transactions/filter-sheet";
+import { TransactionItem } from "@/components/transactions/transaction-item";
+import {
+  EMPTY_FILTERS,
+  PERIODS,
+  TRANSACTIONS,
+  countActiveFilters,
+  inPeriod,
+  type Filters,
+  type Period,
+} from "@/data/transactions";
 
-import { ExternalLink } from "@/components/external-link";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { Collapsible } from "@/components/ui/collapsible";
-import { WebBadge } from "@/components/web-badge";
-import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+export default function TransactionsScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
+  const [query, setQuery] = useState("");
+  const [period, setPeriod] = useState<Period>("today");
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+  const vendors = useMemo(
+    () => [...new Set(TRANSACTIONS.map((t) => t.vendor))].sort(),
+    [],
+  );
+  const categories = useMemo(
+    () => [...new Set(TRANSACTIONS.map((t) => t.category))].sort(),
+    [],
+  );
+
+  const data = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const min = filters.min === "" ? null : Number(filters.min);
+    const max = filters.max === "" ? null : Number(filters.max);
+
+    return TRANSACTIONS.filter((t) => {
+      if (!inPeriod(t.date, period)) return false;
+      if (q && !`${t.vendor} ${t.category}`.toLowerCase().includes(q))
+        return false;
+      if (filters.vendors.length && !filters.vendors.includes(t.vendor))
+        return false;
+      if (filters.categories.length && !filters.categories.includes(t.category))
+        return false;
+      if (min !== null && t.amount < min) return false;
+      if (max !== null && t.amount > max) return false;
+      return true;
+    }).sort((a, b) => +new Date(b.date) - +new Date(a.date));
+  }, [query, period, filters]);
+
+  const activeCount = countActiveFilters(filters);
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}
-    >
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{"\n"}code to help you get started.
-          </ThemedText>
+    <View className="flex-1 bg-background">
+      {/* <Stack.Screen options={{ headerShown: false }} /> */}
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{
-                    ios: "arrow.up.right.square",
-                    android: "link",
-                    web: "link",
-                  }}
-                  size={12}
-                />
-              </ThemedView>
+      {/* Header */}
+      <View
+        className="border-b border-line bg-surface px-5 pb-4"
+        style={{ paddingTop: insets.top + 12 }}
+      >
+        <View className="h-8 items-center justify-center">
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={12}
+            className="absolute left-0"
+            accessibilityLabel="Close"
+          >
+            <Icon icon={X} size={22} />
+          </Pressable>
+          <Text className="text-base font-bold text-foreground">
+            Transactions
+          </Text>
+        </View>
+      </View>
+
+      {/* Search + filter button */}
+      <View className="flex-row items-center gap-3 px-5 pt-5">
+        <View className="h-11 flex-1 flex-row items-center rounded-xl border border-line bg-surface px-3">
+          <Icon icon={Search} size={16} colorVar="--color-muted" />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search transactions"
+            placeholderTextColorClassName="accent-placeholder"
+            returnKeyType="search"
+            className="ml-2 flex-1 text-sm text-foreground"
+          />
+          {query.length > 0 && (
+            <Pressable onPress={() => setQuery("")} hitSlop={8}>
+              <Icon icon={CircleX} size={16} colorVar="--color-muted" />
             </Pressable>
-          </ExternalLink>
-        </ThemedView>
+          )}
+        </View>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens:{" "}
-              <ThemedText type="code">src/app/index.tsx</ThemedText> and{" "}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in{" "}
-              <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+        <Pressable
+          onPress={() => setSheetOpen(true)}
+          accessibilityLabel="Filter transactions"
+          className="size-11 items-center justify-center rounded-xl border border-line bg-surface active:bg-surface-dim"
+        >
+          <Icon icon={Funnel} size={18} colorVar="--color-muted" />
+          {activeCount > 0 && (
+            <View className="absolute -right-1 -top-1 size-4 items-center justify-center rounded-full bg-background-element">
+              <Text className="text-[9px] font-bold text-on-primary">
+                {activeCount}
+              </Text>
+            </View>
+          )}
+        </Pressable>
+      </View>
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView
-              type="backgroundElement"
-              style={styles.collapsibleContent}
-            >
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open
-                the web version, press{" "}
-                <ThemedText type="smallBold">w</ThemedText> in the terminal
-                running this project.
-              </ThemedText>
-              <Image
-                source={require("@/assets/images/tutorial-web.png")}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
+      {/* Period tabs */}
+      <View className="py-5">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-3 px-5"
+        >
+          {PERIODS.map((p) => {
+            const selected = p.key === period;
+            return (
+              <Pressable
+                key={p.key}
+                onPress={() => setPeriod(p.key)}
+                className={`h-10 min-w-24 items-center justify-center rounded-lg border px-4 ${
+                  selected
+                    ? "border-foreground bg-surface"
+                    : "border-transparent bg-chip"
+                }`}
+              >
+                <Text
+                  className={`text-xs font-bold ${
+                    selected ? "text-foreground" : "text-muted"
+                  }`}
+                >
+                  {p.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the{" "}
-              <ThemedText type="code">@2x</ThemedText> and{" "}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files
-              for different screen densities.
-            </ThemedText>
-            <Image
-              source={require("@/assets/images/react-logo.png")}
-              style={styles.imageReact}
-            />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+      {/* List */}
+      <FlatList
+        data={data}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <TransactionItem item={item} />}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        ListEmptyComponent={
+          <View className="items-center px-8 pt-16">
+            <Icon icon={Receipt} size={40} colorVar="--color-muted" />
+            <Text className="mt-3 text-sm font-semibold text-foreground">
+              No transactions found
+            </Text>
+            <Text className="mt-1 text-center text-xs text-muted">
+              Try a different period or clear your filters.
+            </Text>
+            {(activeCount > 0 || query) && (
+              <Pressable
+                onPress={() => {
+                  setFilters(EMPTY_FILTERS);
+                  setQuery("");
+                }}
+                className="mt-4 h-10 items-center justify-center rounded-lg bg-background-element px-5 active:opacity-80"
+              >
+                <Text className="text-xs font-bold text-on-primary">
+                  Clear filters
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        }
+      />
 
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{" "}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets
-              you inspect what the user&apos;s current color scheme is, and so
-              you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{" "}
-              <ThemedText type="code">
-                src/components/ui/collapsible.tsx
-              </ThemedText>{" "}
-              component uses the powerful{" "}
-              <ThemedText type="code">react-native-reanimated</ThemedText>{" "}
-              library to animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === "web" && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+      <FilterSheet
+        visible={sheetOpen}
+        filters={filters}
+        vendors={vendors}
+        categories={categories}
+        onClose={() => setSheetOpen(false)}
+        onApply={(next) => {
+          setFilters(next);
+          setSheetOpen(false);
+        }}
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: "center",
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
-  },
-  centerText: {
-    textAlign: "center",
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: "row",
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: "center",
-    gap: Spacing.one,
-    alignItems: "center",
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: "center",
-  },
-  imageTutorial: {
-    width: "100%",
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: "center",
-  },
-});

@@ -8,7 +8,10 @@ import useAuth from "@/context/useAuth";
 import ProfileProvider from "@/context/ProfileProvider";
 import useProfile from "@/context/useProfile";
 
+import { Uniwind } from "uniwind";
+
 SplashScreen.preventAutoHideAsync();
+Uniwind.setTheme("light");
 
 function RootNavigator() {
   const { session, isLoading } = useAuth();
@@ -16,16 +19,26 @@ function RootNavigator() {
 
   return (
     <Stack>
-      <Stack.Protected guard={!!session}>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!isOnboarded}>
+        <Stack.Screen
+          name="onboarding"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!session && !!isOnboarded}>
         <Stack.Screen
           name="(app)"
           options={{
             headerShown: false,
           }}
         />
-      </Stack.Protected>
-      <Stack.Protected guard={!session}>
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
       </Stack.Protected>
 
       {/* <Stack.Screen
@@ -40,14 +53,6 @@ function RootNavigator() {
           },
         }}
       /> */}
-      <Stack.Protected guard={!!isOnboarded}>
-        <Stack.Screen
-          name="onboarding"
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack.Protected>
     </Stack>
   );
 }

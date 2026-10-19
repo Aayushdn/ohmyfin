@@ -1,3 +1,5 @@
+import { SplashScreen } from "expo-router";
+
 import { supabase } from "@/utils/supabase";
 import { Session } from "@supabase/supabase-js";
 import { createContext, useEffect, useState } from "react";
@@ -24,6 +26,7 @@ export default function AuthProvider({
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setIsLoading(false);
+      SplashScreen.hide();
     });
     const {
       data: { subscription },

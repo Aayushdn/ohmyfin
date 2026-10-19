@@ -7,8 +7,8 @@ export default function StackLayout() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="profileSetup" />
       <Stack.Screen name="index" />
+      <Stack.Screen name="profileSetup" />
     </Stack>
   );
 }

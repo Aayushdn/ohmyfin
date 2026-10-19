@@ -16,7 +16,7 @@ export default function ProfileProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isOnboarded, setIsOnboarded] = useState(false);
+  const [isOnboarded, setIsOnboarded] = useState(true);
   const [fullName, setFullName] = useState("Aayush Swodari");
 
   return (

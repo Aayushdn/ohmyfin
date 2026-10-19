@@ -15,7 +15,7 @@ export default function HomeScreen() {
       <Text>Hello world</Text>
       {/* <Button title="Go to start" onPress={() => router.push("/onboarding")} /> */}
 
-      {/* <Button title="Signout" onPress={() => signOut()} /> */}
+      <Button title="Signout" onPress={() => signOut()} />
       {/* <Button
         title="ADD TRANSACTION  "
         onPress={() => router.push("/(app)/addTransaction")}

@@ -7,8 +7,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+// expo router import
 import { router } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
+
+// icons import
 import {
   Wallet,
   PiggyBank,
@@ -22,9 +25,10 @@ import {
   Drama,
   Ellipsis,
 } from "lucide-react-native";
+
 import { useCSSVariable } from "uniwind";
 
-type EntryType = "expense" | "income";
+type EntryType = "expense" | "income"; // Transaction type;
 
 type FormValues = {
   type: EntryType;
@@ -36,6 +40,7 @@ type FormValues = {
   note: string;
 };
 
+// temp ui values
 const ACCOUNTS = [
   { id: "mastercard", name: "Mastercard", meta: "...8892", Icon: Wallet },
   { id: "vault", name: "Vault", meta: "...1023", Icon: PiggyBank },
@@ -76,7 +81,7 @@ export default function NewEntryScreen() {
     },
   });
 
-  // Icon colors can't be set via className, so resolve them from the theme.
+  // Icon colors can't be set via className, so using cssVariable to resolve from theme
   const [foreground, muted, secondary, onPrimary] = useCSSVariable([
     "--color-foreground",
     "--color-muted",
@@ -99,7 +104,7 @@ export default function NewEntryScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-background pb-10"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         className="flex-1"
@@ -170,8 +175,9 @@ export default function NewEntryScreen() {
               {errors.amount.message}
             </Text>
           )}
+          // TODO temp value
           <View className="mt-4 rounded-full bg-chip px-4 py-1.5">
-            <Text className="text-xs font-semibold text-muted">USD</Text>
+            <Text className="text-xs font-semibold text-muted">EUR</Text>
           </View>
         </View>
 
@@ -242,9 +248,9 @@ export default function NewEntryScreen() {
           )}
         />
 
-        {/* Entry date */}
+        {/* Transaction date */}
         <Text className="mt-8 mb-3 text-xs uppercase tracking-widest text-muted">
-          Entry date
+          Transaction date
         </Text>
         <Controller
           control={control}

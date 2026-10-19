@@ -23,13 +23,11 @@ theme {
   --spacing-five: 32px;
   --spacing-six: 64px;
 
-  --font-sans: system-ui;
-  --font-serif: ui-serif;
+  /* --font-sans: system-ui; */
+  --font-sans: serif;
+  --font-serif: serif;
   --font-rounded: ui-rounded;
   --font-mono: ui-monospace;
-}
-
-@theme {
 }
 
 @layer theme {
@@ -37,6 +35,7 @@ theme {
     @variant light {
       --color-text: #000000;
       --color-background: #ffffff;
+      /* --color-background-element: #094cb2; */
       --color-background-element: #094cb2;
       --color-background-selected: #e0e1e6;
       --color-text-secondary: #60646c;
