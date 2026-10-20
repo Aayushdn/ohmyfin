@@ -1,1 +1,13 @@
-{"version":"7","dialect":"sqlite","entries":[]}
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1792530098762,
+      "tag": "0000_clever_leech",
+      "breakpoints": true
+    }
+  ]
+}

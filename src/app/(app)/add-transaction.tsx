@@ -175,7 +175,6 @@ export default function NewEntryScreen() {
               {errors.amount.message}
             </Text>
           )}
-          // TODO temp value
           <View className="mt-4 rounded-full bg-chip px-4 py-1.5">
             <Text className="text-xs font-semibold text-muted">EUR</Text>
           </View>

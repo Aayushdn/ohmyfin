@@ -56,6 +56,12 @@ function RootNavigator() {
     </Stack>
   );
 }
+
+/**
+ *
+ * @returns React function Component with Auth provider, profileProvider
+ * TODO: SETUP migration code for expo sqlite;
+ */
 export default function RootLayout() {
   return (
     <>

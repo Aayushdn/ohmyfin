@@ -5,6 +5,8 @@ const { withUniwindConfig } = require("uniwind/metro");
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
+config.resolver.sourceExts.push("sql"); // <--- add this
+
 // your metro modifications
 
 module.exports = withUniwindConfig(config, {
@@ -14,7 +16,3 @@ module.exports = withUniwindConfig(config, {
   // defaults to project's root
   dtsFile: "./src/uniwind-types.d.ts",
 });
-
-config.resolver.sourceExts.push("sql"); // <--- add this
-
-module.exports = config;

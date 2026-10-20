@@ -5,10 +5,9 @@ import { useRouter } from "expo-router";
 import { X } from "lucide-react-native";
 
 export default function appLayout() {
-  const [foreground, surface, line] = useCSSVariable([
+  const [foreground, surface] = useCSSVariable([
     "--color-foreground",
     "--color-surface",
-    "--color-line",
   ]) as string[];
   const router = useRouter();
 

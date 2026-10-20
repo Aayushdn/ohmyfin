@@ -35,11 +35,11 @@ theme {
     @variant light {
       --color-text: #000000;
       --color-background: #ffffff;
-      /* --color-background-element: #094cb2; */
+      --color-background-element: #094cb2;
       --color-background-element: #094cb2;
       --color-background-selected: #e0e1e6;
       --color-text-secondary: #60646c;
-      /* --color-primary: #094cb2; */
+      --color-primary: #094cb2;
 
       --color-background: #faf9f9; /* screen background */
       --color-surface: #ffffff; /* header, inputs, selected account card */
