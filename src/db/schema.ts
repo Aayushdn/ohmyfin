@@ -17,7 +17,7 @@ import {
 //   * Run `PRAGMA foreign_keys = ON;` right after opening the DB (db/client.ts)
 
 export const FREQUENCIES = ["daily", "weekly", "monthly", "yearly"] as const;
-export const CATEGORY_TYPES = ["Food", "School", "Misc"] as const;
+export const CATEGORY_TYPES = ["income", "expense"] as const;
 export const TRANSACTION_TYPES = ["income", "expense"] as const;
 
 const timestamps = {
@@ -41,6 +41,11 @@ export const users = sqliteTable("users", {
   address: text("address"),
   phoneNumber: text("phone_number"),
   currency: text("currency"),
+  // false until the user finishes (or skips) the onboarding questions.
+  // Drives the route guard: not onboarded -> onboarding screens.
+  isOnboarded: integer("is_onboarded", { mode: "boolean" })
+    .notNull()
+    .default(false),
   hasProfilePicture: integer("has_profile_picture", { mode: "boolean" })
     .notNull()
     .default(false),
@@ -57,14 +62,55 @@ export const categories = sqliteTable(
       .notNull()
       .references(() => users.userId, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    type: text("type", { enum: CATEGORY_TYPES }),
+    type: text("type", { enum: CATEGORY_TYPES }).notNull(), // 'income' | 'expense'
+    // Icon key from your app's icon registry (e.g. an Ionicons name like
+    // "fast-food-outline"). NULL = fall back to a default icon in the UI.
+    icon: text("icon"),
     ...timestamps,
   },
   (t) => [
-    uniqueIndex("uq_categories_user_name").on(t.userId, t.name),
+    // Name is unique per user AND type, so "Other" can exist as both an
+    // income category and an expense category.
+    uniqueIndex("uq_categories_user_type_name").on(t.userId, t.type, t.name),
+    check("categories_type_check", sql`${t.type} IN ('income', 'expense')`),
+  ],
+);
+
+// A recurring rule is a TEMPLATE, not a transaction. On app start / foreground,
+// the app inserts a real row into `transactions` for every occurrence that has
+// come due since `lastGeneratedDate` (see recurringService.processRecurring).
+export const recurringTransactions = sqliteTable(
+  "recurring_transactions",
+  {
+    recurringId: integer("recurring_id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.userId, { onDelete: "cascade" }),
+    categoryId: integer("category_id").references(() => categories.categoryId, {
+      onDelete: "set null",
+    }),
+    amountCents: integer("amount_cents").notNull(),
+    type: text("type", { enum: TRANSACTION_TYPES }).notNull(),
+    merchant: text("merchant"),
+    notes: text("notes"),
+    frequency: text("frequency", { enum: FREQUENCIES }).notNull(),
+    startDate: text("start_date").notNull(), // 'YYYY-MM-DD', first occurrence
+    endDate: text("end_date"), // NULL = repeats forever
+    lastGeneratedDate: text("last_generated_date"), // NULL = nothing generated yet
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    ...timestamps,
+  },
+  (t) => [
+    index("idx_recurring_user_active").on(t.userId, t.isActive),
+    check("recurring_amount_check", sql`${t.amountCents} >= 0`),
+    check("recurring_type_check", sql`${t.type} IN ('income', 'expense')`),
     check(
-      "categories_type_check",
-      sql`${t.type} IN ('Food', 'School', 'Misc')`,
+      "recurring_frequency_check",
+      sql`${t.frequency} IN ('daily', 'weekly', 'monthly', 'yearly')`,
+    ),
+    check(
+      "recurring_end_date_check",
+      sql`${t.endDate} IS NULL OR ${t.endDate} >= ${t.startDate}`,
     ),
   ],
 );
@@ -79,24 +125,33 @@ export const transactions = sqliteTable(
     categoryId: integer("category_id").references(() => categories.categoryId, {
       onDelete: "set null",
     }),
+    // Set only for rows generated from a recurring rule; NULL for normal entries
+    recurringId: integer("recurring_id").references(
+      () => recurringTransactions.recurringId,
+      { onDelete: "set null" },
+    ),
     amountCents: integer("amount_cents").notNull().default(0),
     type: text("type", { enum: TRANSACTION_TYPES }).notNull(),
     merchant: text("merchant"),
     transactionDate: text("transaction_date").notNull(), // 'YYYY-MM-DD'
-    isRecurring: integer("is_recurring", { mode: "boolean" })
-      .notNull()
-      .default(false),
-    frequency: text("frequency", { enum: FREQUENCIES }), // only set when recurring
     notes: text("notes"),
     ...timestamps,
   },
   (t) => [
     index("idx_transactions_user_date").on(t.userId, t.transactionDate),
     index("idx_transactions_category").on(t.categoryId),
+    // Prevents the same occurrence being generated twice. Normal transactions
+    // have recurring_id = NULL, and SQLite treats NULLs as distinct in unique
+    // indexes, so they are unaffected.
+    uniqueIndex("uq_transactions_recurring_date").on(
+      t.recurringId,
+      t.transactionDate,
+    ),
     check("transactions_type_check", sql`${t.type} IN ('income', 'expense')`),
+    // Rejects anything that isn't a real, correctly formatted YYYY-MM-DD date
     check(
-      "transactions_frequency_check",
-      sql`${t.frequency} IN ('daily', 'weekly', 'monthly', 'yearly')`,
+      "transactions_date_check",
+      sql`date(${t.transactionDate}) = ${t.transactionDate}`,
     ),
   ],
 );
@@ -151,7 +206,11 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Category = typeof categories.$inferSelect;
 export type NewCategory = typeof categories.$inferInsert;
+export type RecurringTransaction = typeof recurringTransactions.$inferSelect;
+export type NewRecurringTransaction = typeof recurringTransactions.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
-export type BudgetRule = typeof budgetRules.$inferSelect;
 export type Budget = typeof budgets.$inferSelect;
+export type NewBudget = typeof budgets.$inferInsert;
+export type BudgetRule = typeof budgetRules.$inferSelect;
+export type NewBudgetRule = typeof budgetRules.$inferInsert;

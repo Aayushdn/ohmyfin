@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "aa7cab53-ecf9-469d-b233-fc75fe2c8f4c",
+  "id": "2ecfa492-6198-4b90-a3be-74485c1298b6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "budget_rules": {
@@ -236,6 +236,13 @@
           "name": "type",
           "type": "text",
           "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
@@ -257,10 +264,11 @@
         }
       },
       "indexes": {
-        "uq_categories_user_name": {
-          "name": "uq_categories_user_name",
+        "uq_categories_user_type_name": {
+          "name": "uq_categories_user_type_name",
           "columns": [
             "user_id",
+            "type",
             "name"
           ],
           "isUnique": true
@@ -286,7 +294,171 @@
       "checkConstraints": {
         "categories_type_check": {
           "name": "categories_type_check",
-          "value": "\"categories\".\"type\" IN ('Food', 'School', 'Misc')"
+          "value": "\"categories\".\"type\" IN ('income', 'expense')"
+        }
+      }
+    },
+    "recurring_transactions": {
+      "name": "recurring_transactions",
+      "columns": {
+        "recurring_id": {
+          "name": "recurring_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "amount_cents": {
+          "name": "amount_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "merchant": {
+          "name": "merchant",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "frequency": {
+          "name": "frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_generated_date": {
+          "name": "last_generated_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "idx_recurring_user_active": {
+          "name": "idx_recurring_user_active",
+          "columns": [
+            "user_id",
+            "is_active"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "recurring_transactions_user_id_users_user_id_fk": {
+          "name": "recurring_transactions_user_id_users_user_id_fk",
+          "tableFrom": "recurring_transactions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "recurring_transactions_category_id_categories_category_id_fk": {
+          "name": "recurring_transactions_category_id_categories_category_id_fk",
+          "tableFrom": "recurring_transactions",
+          "tableTo": "categories",
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "category_id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "recurring_amount_check": {
+          "name": "recurring_amount_check",
+          "value": "\"recurring_transactions\".\"amount_cents\" >= 0"
+        },
+        "recurring_type_check": {
+          "name": "recurring_type_check",
+          "value": "\"recurring_transactions\".\"type\" IN ('income', 'expense')"
+        },
+        "recurring_frequency_check": {
+          "name": "recurring_frequency_check",
+          "value": "\"recurring_transactions\".\"frequency\" IN ('daily', 'weekly', 'monthly', 'yearly')"
+        },
+        "recurring_end_date_check": {
+          "name": "recurring_end_date_check",
+          "value": "\"recurring_transactions\".\"end_date\" IS NULL OR \"recurring_transactions\".\"end_date\" >= \"recurring_transactions\".\"start_date\""
         }
       }
     },
@@ -309,6 +481,13 @@
         },
         "category_id": {
           "name": "category_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "recurring_id": {
+          "name": "recurring_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -341,21 +520,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "is_recurring": {
-          "name": "is_recurring",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "frequency": {
-          "name": "frequency",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
           "autoincrement": false
         },
         "notes": {
@@ -397,6 +561,14 @@
             "category_id"
           ],
           "isUnique": false
+        },
+        "uq_transactions_recurring_date": {
+          "name": "uq_transactions_recurring_date",
+          "columns": [
+            "recurring_id",
+            "transaction_date"
+          ],
+          "isUnique": true
         }
       },
       "foreignKeys": {
@@ -425,6 +597,19 @@
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
+        },
+        "transactions_recurring_id_recurring_transactions_recurring_id_fk": {
+          "name": "transactions_recurring_id_recurring_transactions_recurring_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "recurring_transactions",
+          "columnsFrom": [
+            "recurring_id"
+          ],
+          "columnsTo": [
+            "recurring_id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -434,9 +619,9 @@
           "name": "transactions_type_check",
           "value": "\"transactions\".\"type\" IN ('income', 'expense')"
         },
-        "transactions_frequency_check": {
-          "name": "transactions_frequency_check",
-          "value": "\"transactions\".\"frequency\" IN ('daily', 'weekly', 'monthly', 'yearly')"
+        "transactions_date_check": {
+          "name": "transactions_date_check",
+          "value": "date(\"transactions\".\"transaction_date\") = \"transactions\".\"transaction_date\""
         }
       }
     },
@@ -512,6 +697,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "is_onboarded": {
+          "name": "is_onboarded",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "has_profile_picture": {
           "name": "has_profile_picture",

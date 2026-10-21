@@ -1,78 +1,70 @@
-import * as SplashScreen from "expo-splash-screen";
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
-import { DevPathNavigator } from "@/components/dev-path-navigator";
-
+import { View, Text } from "react-native";
 import { Stack } from "expo-router";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import * as SplashScreen from "expo-splash-screen";
+import { Uniwind } from "uniwind";
+
+import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { DevPathNavigator } from "@/components/dev-tools";
 import AuthProvider from "@/context/AuthProvider";
 import useAuth from "@/context/useAuth";
 import ProfileProvider from "@/context/ProfileProvider";
 import useProfile from "@/context/useProfile";
 
-import { Uniwind } from "uniwind";
+import { db } from "../db/client";
+import migrations from "../../drizzle/migrations";
 
 SplashScreen.preventAutoHideAsync();
 Uniwind.setTheme("light");
 
 function RootNavigator() {
   const { session, isLoading } = useAuth();
-  const { isOnboarded } = useProfile();
+  const { profile } = useProfile();
+
+  if (isLoading) return null; // wait for the Supabase session to restore
+
+  const isOnboarded = profile?.isOnboarded ?? false;
 
   return (
-    <Stack>
-      <Stack.Protected guard={!session}>
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* Order matters: the first available screen is the landing screen */}
+      <Stack.Protected guard={isOnboarded}>
+        <Stack.Screen name="(app)" />
       </Stack.Protected>
 
       <Stack.Protected guard={!isOnboarded}>
-        <Stack.Screen
-          name="onboarding"
-          options={{
-            headerShown: false,
-          }}
-        />
+        <Stack.Screen name="onboarding" />
       </Stack.Protected>
 
-      <Stack.Protected guard={!!session && !!isOnboarded}>
-        <Stack.Screen
-          name="(app)"
-          options={{
-            headerShown: false,
-          }}
-        />
+      {/* Guests stay able to reach login/signup later */}
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="auth" />
       </Stack.Protected>
-
-      {/* <Stack.Screen
-        name="index"
-        options={{
-          headerStyle: {
-            backgroundColor: "#f4511e",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      /> */}
     </Stack>
   );
 }
 
-/**
- *
- * @returns React function Component with Auth provider, profileProvider
- * TODO: SETUP migration code for expo sqlite;
- */
 export default function RootLayout() {
+  // Migrations run here, ABOVE ProfileProvider, so the users table exists
+  // before ProfileProvider's first render queries it.
+  const { success, error } = useMigrations(db, migrations);
+
   return (
     <>
       <AuthProvider>
         <AnimatedSplashOverlay />
-        <ProfileProvider>
-          <RootNavigator />
-        </ProfileProvider>
+        {error ? (
+          <View>
+            <Text>{String((error as any).cause ?? "")}</Text>
+          </View>
+        ) : success ? (
+          <ProfileProvider>
+            <RootNavigator />
+            {/* dev-only, renders nothing in production */}
+            <DevPathNavigator />
+          </ProfileProvider>
+        ) : null}
       </AuthProvider>
-      {/* dev-only, renders nothing in production */}
-      <DevPathNavigator />
     </>
   );
 }

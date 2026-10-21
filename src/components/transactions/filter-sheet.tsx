@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "@/components/ui/icon";
-import { EMPTY_FILTERS, type Filters } from "@/data/transactions";
+import { EMPTY_FILTERS, type Filters } from "@/data/transactions_old";
 
 type Props = {
   visible: boolean;
@@ -96,7 +96,9 @@ export function FilterSheet({
               keyboardType="decimal-pad"
               className="h-11 flex-1 rounded-lg border border-line bg-surface-dim px-3 text-sm text-foreground"
             />
-            <Text className="mx-3 text-xs font-semibold text-foreground">To</Text>
+            <Text className="mx-3 text-xs font-semibold text-foreground">
+              To
+            </Text>
             <TextInput
               value={draft.max}
               onChangeText={(v) => setAmount("max", v)}
@@ -112,7 +114,9 @@ export function FilterSheet({
               onPress={() => setDraft(EMPTY_FILTERS)}
               className="h-12 items-center justify-center rounded-xl border border-line px-5 active:bg-surface-dim"
             >
-              <Text className="text-sm font-semibold text-foreground">Reset</Text>
+              <Text className="text-sm font-semibold text-foreground">
+                Reset
+              </Text>
             </Pressable>
 
             {/* Primary button uses --color-background-element */}
@@ -120,7 +124,9 @@ export function FilterSheet({
               onPress={() => onApply(draft)}
               className="h-12 flex-1 items-center justify-center rounded-xl bg-background-element active:opacity-80"
             >
-              <Text className="text-sm font-bold text-on-primary">Apply Filters</Text>
+              <Text className="text-sm font-bold text-on-primary">
+                Apply Filters
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -157,7 +163,9 @@ function MultiSelect({
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-xs font-semibold text-foreground">{label}</Text>
+      <Text className="mb-2 text-xs font-semibold text-foreground">
+        {label}
+      </Text>
 
       <Pressable
         onPress={() => setOpen((o) => !o)}
@@ -199,7 +207,12 @@ function MultiSelect({
                   }`}
                 >
                   {checked && (
-                    <Icon icon={Check} size={14} strokeWidth={3} colorVar="--color-on-primary" />
+                    <Icon
+                      icon={Check}
+                      size={14}
+                      strokeWidth={3}
+                      colorVar="--color-on-primary"
+                    />
                   )}
                 </View>
                 <Text className="text-sm text-foreground">{option}</Text>

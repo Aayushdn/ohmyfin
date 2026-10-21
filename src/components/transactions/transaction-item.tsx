@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Pressable, Text, View } from "react-native";
-import { formatAmount, type Transaction } from "@/data/transactions";
+import { formatAmount, type Transaction } from "@/data/transactions_old";
 
 // Static strings so the Tailwind scanner can see them.
 const AVATAR_COLORS = [
@@ -13,7 +13,8 @@ const AVATAR_COLORS = [
 
 function avatarClass(seed: string) {
   let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  for (let i = 0; i < seed.length; i++)
+    hash = (hash * 31 + seed.charCodeAt(i)) | 0;
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -33,7 +34,10 @@ function TransactionItemBase({ item, onPress }: Props) {
       <View className={`size-6 rounded-full ${avatarClass(item.vendor)}`} />
 
       <View className="ml-3 flex-1 items-start">
-        <Text className="text-sm font-semibold text-foreground" numberOfLines={1}>
+        <Text
+          className="text-sm font-semibold text-foreground"
+          numberOfLines={1}
+        >
           {item.vendor}
         </Text>
         <View className="mt-1 rounded bg-chip px-2 py-0.5">

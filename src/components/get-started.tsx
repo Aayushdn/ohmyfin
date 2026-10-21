@@ -81,16 +81,24 @@ function BudgetIcon() {
 /* Screen                                                              */
 /* ------------------------------------------------------------------ */
 type Props = {
-  /** Called when the button is pressed or the knob is dragged all the way up */
-  onStart?: () => void;
+  /** "Login / Sign up with us" pressed: send the user to the auth screens */
+  onLogin?: () => void;
+  /**
+   * "Continue locally" pressed, or the knob dragged all the way up:
+   * start as a guest with data kept on this device
+   */
+  onContinueLocally?: () => void;
 };
 
-export default function GetStarted({ onStart = () => {} }: Props) {
+export default function GetStarted({
+  onLogin = () => {},
+  onContinueLocally = () => {},
+}: Props) {
   const { height } = useWindowDimensions();
 
   // keep the latest callback available to the (one-time) PanResponder
-  const onStartRef = useRef(onStart);
-  onStartRef.current = onStart;
+  const onContinueRef = useRef(onContinueLocally);
+  onContinueRef.current = onContinueLocally;
 
   const translateY = useRef(new Animated.Value(0)).current;
 
@@ -106,7 +114,7 @@ export default function GetStarted({ onStart = () => {} }: Props) {
           useNativeDriver: true,
           bounciness: 6,
         }).start();
-        if (g.dy < -TRACK_TRAVEL * 0.7) onStartRef.current?.();
+        if (g.dy < -TRACK_TRAVEL * 0.7) onContinueRef.current?.();
       },
     }),
   ).current;
@@ -116,20 +124,41 @@ export default function GetStarted({ onStart = () => {} }: Props) {
       {/* ---------- top: white content area ---------- */}
       <View style={[styles.content, { paddingTop: height * 0.2 }]}>
         <BudgetIcon />
-        <Text className="m-top-7 max-w-47.5 text-center text-[13px] text-[#6e6e80] leading-[17px]">
+        <Text style={styles.subtitle}>
           We'll personalise your budgeting experience under a minute
         </Text>
 
-        <Pressable
-          onPress={onStart}
-          accessibilityRole="button"
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-          ]}
-        >
-          <Text style={styles.buttonText}>Lets Get started</Text>
-        </Pressable>
+        <View style={styles.actions}>
+          <Pressable
+            onPress={onLogin}
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.button,
+              styles.buttonPrimary,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Text style={[styles.buttonText, styles.buttonTextPrimary]}>
+              Login / Sign up with us
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={onContinueLocally}
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <Text style={styles.buttonText}>Continue locally</Text>
+          </Pressable>
+        </View>
+
+        <Text style={styles.hint}>
+          Continuing locally keeps your data on this device. You can create an
+          account later in Settings.
+        </Text>
       </View>
 
       {/* ---------- bottom: stacked colour bands ---------- */}
@@ -170,14 +199,22 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     color: COLORS.body,
   },
-  button: {
+  actions: {
     marginTop: 24,
+    gap: 12,
+    alignItems: "center",
+  },
+  button: {
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: COLORS.ink,
     backgroundColor: COLORS.white,
+  },
+  buttonPrimary: {
+    borderColor: COLORS.panel,
+    backgroundColor: COLORS.panel,
   },
   buttonPressed: {
     opacity: 0.6,
@@ -186,6 +223,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "500",
     color: COLORS.ink,
+  },
+  buttonTextPrimary: {
+    color: COLORS.white,
+  },
+  hint: {
+    marginTop: 16,
+    maxWidth: 230,
+    textAlign: "center",
+    fontSize: 12,
+    lineHeight: 16,
+    color: COLORS.body,
   },
 
   bottom: {

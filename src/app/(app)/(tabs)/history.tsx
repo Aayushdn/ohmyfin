@@ -21,7 +21,7 @@ import {
   inPeriod,
   type Filters,
   type Period,
-} from "@/data/transactions";
+} from "@/data/transactions_old";
 
 export default function TransactionsScreen() {
   const router = useRouter();

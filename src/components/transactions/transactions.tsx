@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { FlatList, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { CircleX, Funnel, Receipt, Search, X } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,7 +21,7 @@ import {
   inPeriod,
   type Filters,
   type Period,
-} from "@/data/transactions";
+} from "@/data/transactions_old";
 
 export default function TransactionsScreen() {
   const router = useRouter();
@@ -41,8 +48,10 @@ export default function TransactionsScreen() {
 
     return TRANSACTIONS.filter((t) => {
       if (!inPeriod(t.date, period)) return false;
-      if (q && !`${t.vendor} ${t.category}`.toLowerCase().includes(q)) return false;
-      if (filters.vendors.length && !filters.vendors.includes(t.vendor)) return false;
+      if (q && !`${t.vendor} ${t.category}`.toLowerCase().includes(q))
+        return false;
+      if (filters.vendors.length && !filters.vendors.includes(t.vendor))
+        return false;
       if (filters.categories.length && !filters.categories.includes(t.category))
         return false;
       if (min !== null && t.amount < min) return false;
@@ -71,7 +80,9 @@ export default function TransactionsScreen() {
           >
             <Icon icon={X} size={22} />
           </Pressable>
-          <Text className="text-base font-bold text-foreground">Transactions</Text>
+          <Text className="text-base font-bold text-foreground">
+            Transactions
+          </Text>
         </View>
       </View>
 
@@ -102,7 +113,9 @@ export default function TransactionsScreen() {
           <Icon icon={Funnel} size={18} colorVar="--color-muted" />
           {activeCount > 0 && (
             <View className="absolute -right-1 -top-1 size-4 items-center justify-center rounded-full bg-background-element">
-              <Text className="text-[9px] font-bold text-on-primary">{activeCount}</Text>
+              <Text className="text-[9px] font-bold text-on-primary">
+                {activeCount}
+              </Text>
             </View>
           )}
         </Pressable>
@@ -122,7 +135,9 @@ export default function TransactionsScreen() {
                 key={p.key}
                 onPress={() => setPeriod(p.key)}
                 className={`h-10 min-w-24 items-center justify-center rounded-lg border px-4 ${
-                  selected ? "border-foreground bg-surface" : "border-transparent bg-chip"
+                  selected
+                    ? "border-foreground bg-surface"
+                    : "border-transparent bg-chip"
                 }`}
               >
                 <Text
@@ -162,7 +177,9 @@ export default function TransactionsScreen() {
                 }}
                 className="mt-4 h-10 items-center justify-center rounded-lg bg-background-element px-5 active:opacity-80"
               >
-                <Text className="text-xs font-bold text-on-primary">Clear filters</Text>
+                <Text className="text-xs font-bold text-on-primary">
+                  Clear filters
+                </Text>
               </Pressable>
             )}
           </View>
